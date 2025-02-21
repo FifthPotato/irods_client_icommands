@@ -10,6 +10,8 @@
 #include <irods/irods_client_api_table.hpp>
 #include <irods/irods_pack_table.hpp>
 
+#include <nlohmann/json.hpp>
+
 void usage();
 
 int
@@ -82,6 +84,18 @@ main( int argc, char **argv ) {
         day = hr / 24;
         hr = hr % 24;
         printf( "up %d days, %d:%d\n", day, hr, min );
+    }
+    if(miscSvrInfo->certinfo.len > 0) {
+        const char* certinfobuf = static_cast<char*>(miscSvrInfo->certinfo.buf);
+        printf("SSL Info:\n");
+        nlohmann::json certinfo = nlohmann::json::parse(certinfobuf, certinfobuf+miscSvrInfo->certinfo.len);
+        for(auto it = certinfo.begin(); it != certinfo.end(); ++it) {
+            if(it.value().type() == nlohmann::json::value_t::string) {
+                printf("%s: %s\n", it.key().c_str(), it.value().get<std::string>().c_str());
+            } else {
+                printf("%s: %s\n", it.key().c_str(), it.value().dump().c_str());
+            }
+        }
     }
     rcDisconnect( Conn );
 
