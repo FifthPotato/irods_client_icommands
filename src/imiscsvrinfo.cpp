@@ -86,9 +86,11 @@ main( int argc, char **argv ) {
         printf( "up %d days, %d:%d\n", day, hr, min );
     }
     if(miscSvrInfo->certinfo.len > 0) {
+        printf("SSL/TLS Info:\n");
         const char* certinfobuf = static_cast<char*>(miscSvrInfo->certinfo.buf);
-        printf("SSL Info:\n");
         nlohmann::json certinfo = nlohmann::json::parse(certinfobuf, certinfobuf+miscSvrInfo->certinfo.len);
+        printf("enabled: %s\n", certinfo.at("ssl_enabled").dump().c_str());
+        certinfo.erase("ssl_enabled");
         for(auto it = certinfo.begin(); it != certinfo.end(); ++it) {
             if(it.value().type() == nlohmann::json::value_t::string) {
                 printf("%s: %s\n", it.key().c_str(), it.value().get<std::string>().c_str());
